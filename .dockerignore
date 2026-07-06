@@ -1,0 +1,39 @@
+# Reduce build context — exclude everything not needed for the image
+node_modules
+.next
+.git
+.gitignore
+
+# Env files (secrets — never bake into image)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+dev.log
+server.log
+dev.out.log
+
+# Local DB (test data — fresh DB is created on the droplet)
+db/*.db
+db/*.db-journal
+
+# Scratch dirs
+upload
+download
+
+# Sandbox-only / dev-only
+skills
+.zscripts
+examples
+mini-services
+Caddyfile
+worklog.md
+
+# Docs (not needed inside image)
+DEPLOY.md
+README.md
+
+# Build artifacts
+*.tar.gz

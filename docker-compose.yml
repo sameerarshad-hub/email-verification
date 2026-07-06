@@ -1,0 +1,38 @@
+# =====================================================================
+# MailForge — docker-compose for DigitalOcean droplet
+#   Usage:
+#     1. cp .env.example .env   (edit if needed)
+#     2. docker compose up -d --build
+#     3. (optional) put Caddy/nginx in front for HTTPS — see DEPLOY.md
+# =====================================================================
+services:
+  mailforge:
+    build: .
+    image: mailforge:latest
+    container_name: mailforge
+    restart: unless-stopped
+    ports:
+      # Expose Next.js on host port 3000. Put a reverse proxy (Caddy/nginx)
+      # in front for production HTTPS — see DEPLOY.md.
+      - "3000:3000"
+    volumes:
+      # Persistent SQLite database (survives rebuilds/redeploys)
+      - mailforge-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - DATA_DIR=/app/data
+      - DATABASE_URL=file:/app/data/custom.db
+      # Add any extra env vars here, e.g.:
+      # - NEXTAUTH_SECRET=changeme
+    # Healthcheck: hit the homepage; restart if it stays down.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  mailforge-data:
